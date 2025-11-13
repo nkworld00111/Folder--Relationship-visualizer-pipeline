@@ -3,21 +3,21 @@ import numpy as np
 def embed_documents(docs, model_name="sentence-transformers/all-MiniLM-L6-v2"):
     """Generates vector embeddings for each document content."""
     if not docs or not isinstance(docs, list):
-        print("⚠️ Invalid or empty document list.")
+        print("Invalid or empty document list.")
         return []
 
     texts = [d.get("content", "") for d in docs]
 
     try:
         from sentence_transformers import SentenceTransformer
-        print(f"🧠 Loading embedding model: {model_name}")
+        print(f"Loading embedding model: {model_name}")
         model = SentenceTransformer(model_name)
-        print("  ✅ Model loaded successfully. Generating embeddings...")
+        print(" Model loaded successfully. Generating embeddings...")
         vecs = model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
         vecs = vecs.astype(float)
     except Exception as e:
-        print("  ⚠️ SentenceTransformers unavailable or failed:", e)
-        print("  ⏪ Falling back to TF-IDF + TruncatedSVD...")
+        print(" SentenceTransformers unavailable or failed:", e)
+        print(" Falling back to TF-IDF + TruncatedSVD...")
         try:
             from sklearn.feature_extraction.text import TfidfVectorizer
             from sklearn.decomposition import TruncatedSVD
@@ -27,7 +27,7 @@ def embed_documents(docs, model_name="sentence-transformers/all-MiniLM-L6-v2"):
             svd = TruncatedSVD(n_components=n_comp, random_state=42)
             vecs = svd.fit_transform(X)
         except Exception as e2:
-            print("  ❌ Fallback failed:", e2)
+            print("  Fallback failed:", e2)
             print("  Generating random small vectors instead for continuity.")
             vecs = np.random.randn(len(texts), 128).astype(float)
 
@@ -37,7 +37,7 @@ def embed_documents(docs, model_name="sentence-transformers/all-MiniLM-L6-v2"):
     for d, v in zip(docs, vecs):
         d["embedding"] = v.astype(float).tolist()
 
-    print(f"✅ Generated embeddings for {len(docs)} document(s).")
+    print(f"Generated embeddings for {len(docs)} document(s).")
     return docs
 
 
